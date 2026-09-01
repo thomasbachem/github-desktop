@@ -370,6 +370,16 @@ export class CommitList extends React.Component<
     return this.lookupCommits(this.props.selectedSHAs)
   }
 
+  /**
+   * The selected SHAs from oldest to newest, the order in which Git wants a
+   * sequence of commits handed to it, rather than the order in which they
+   * happened to be selected.
+   */
+  private get orderedSelectedSHAs() {
+    const selected = new Set(this.props.selectedSHAs)
+    return this.props.commitSHAs.filter(sha => selected.has(sha)).toReversed()
+  }
+
   private getUnpushedTags(commit: Commit) {
     const tagsToPushSet = new Set(this.props.tagsToPush ?? [])
     return commit.tags.filter(tagName => tagsToPushSet.has(tagName))
@@ -850,6 +860,10 @@ export class CommitList extends React.Component<
         action: () => clipboard.writeText(commit.sha),
       },
       {
+        label: __DARWIN__ ? 'Copy Summary' : 'Copy summary',
+        action: () => clipboard.writeText(commit.summary),
+      },
+      {
         label: __DARWIN__ ? darwinTagsLabel : windowTagsLabel,
         action: () => clipboard.writeText(commit.tags.join(' ')),
         enabled: commit.tags.length > 0,
@@ -947,6 +961,18 @@ export class CommitList extends React.Component<
           : `Reorder ${count} commits…`,
         action: () => this.props.onKeyboardReorder?.(this.selectedCommits),
         enabled: this.canReorder(),
+      },
+      { type: 'separator' },
+      {
+        label: __DARWIN__
+          ? `Copy Summaries of ${count} Commits`
+          : `Copy summaries of ${count} commits`,
+        action: () =>
+          clipboard.writeText(
+            this.lookupCommits(this.orderedSelectedSHAs)
+              .map(c => c.summary)
+              .join('\n')
+          ),
       },
     ]
   }
