@@ -4,7 +4,7 @@
       "target_name": "windows-argv-parser",
       "sources": [ "main.cc" ],
       "include_dirs": [
-        "<!@(node -p \"require('node-addon-api').include\")",
+        "<!(node -p \"require('node-addon-api').include_dir\")",
       ],
       "dependencies": [ "<!(node -p \"require('node-addon-api').targets\"):node_addon_api" ],
       'cflags!': [ '-fno-exceptions' ],
